@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Calculator, Database } from 'lucide-react';
+import { Calculator, Database, Github } from 'lucide-react';
 import CalculatorView from './components/CalculatorView';
 import DatabaseView from './components/DatabaseView';
 import TabButton from './components/TabButton';
@@ -158,24 +158,35 @@ export default function App() {
               <span className="text-xs text-slate-400">工厂量化助手</span>
             </div>
           </div>
-          <nav className="flex space-x-1 bg-slate-900/50 p-1 rounded-lg">
-            <TabButton
-              active={activeTab === 'calculator'}
-              onClick={() => setActiveTab('calculator')}
-              icon={<Calculator size={16} />}
-              label="量化计算"
-            />
-            <TabButton
-              active={activeTab === 'database'}
-              onClick={() => setActiveTab('database')}
-              icon={<Database size={16} />}
-              label="配方管理"
-            />
-          </nav>
+          <div className="flex items-center space-x-3">
+            <nav className="flex space-x-1 bg-slate-900/50 p-1 rounded-lg">
+              <TabButton
+                active={activeTab === 'calculator'}
+                onClick={() => setActiveTab('calculator')}
+                icon={<Calculator size={16} />}
+                label="量化计算"
+              />
+              <TabButton
+                active={activeTab === 'database'}
+                onClick={() => setActiveTab('database')}
+                icon={<Database size={16} />}
+                label="配方管理"
+              />
+            </nav>
+            <a
+              href="https://github.com/Curab7/FactoryCalculator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              title="查看 GitHub 仓库"
+            >
+              <Github size={20} />
+            </a>
+          </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-6 min-h-[calc(100vh-8rem)]">
         {activeTab === 'calculator' ? (
           <CalculatorView
             allItems={allItems}
@@ -199,6 +210,23 @@ export default function App() {
           />
         )}
       </main>
+
+      <footer className="bg-slate-100 border-t border-slate-200 py-4 mt-auto">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-slate-600">
+            <a
+              href="https://github.com/Curab7/FactoryCalculator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-700 hover:underline"
+            >
+              GitHub 仓库
+            </a>
+            {' · '}
+            <span className="text-slate-500">纯AI制作</span>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
