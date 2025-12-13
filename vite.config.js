@@ -5,7 +5,9 @@ import react from '@vitejs/plugin-react';
 // 开发环境使用根路径，生产环境使用仓库名作为 base
 // 如果仓库名不是 'FactoryCalculator'，请设置环境变量 VITE_REPO_NAME
 const repositoryName = process.env.VITE_REPO_NAME || 'FactoryCalculator';
-const base = process.env.NODE_ENV === 'production' ? `/${repositoryName}/` : '/';
+// 如果有 VITE_REPO_NAME 环境变量，说明是生产构建，使用仓库名作为 base
+// 否则使用根路径（开发环境）
+const base = process.env.VITE_REPO_NAME ? `/${repositoryName}/` : '/';
 
 export default defineConfig({
   plugins: [react()],
