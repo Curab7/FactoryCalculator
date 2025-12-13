@@ -9,6 +9,11 @@ const repositoryName = process.env.VITE_REPO_NAME || 'FactoryCalculator';
 // 否则使用根路径（开发环境）
 const base = process.env.VITE_REPO_NAME ? `/${repositoryName}/` : '/';
 
+// 输出配置信息（用于调试）
+if (process.env.VITE_REPO_NAME) {
+  console.log(`Building for GitHub Pages with base: ${base}`);
+}
+
 export default defineConfig({
   plugins: [react()],
   base: base,
@@ -18,7 +23,15 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
+    assetsDir: 'assets',
+    // 确保资源路径正确
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[hash].[ext]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js'
+      }
+    }
   }
 });
 
