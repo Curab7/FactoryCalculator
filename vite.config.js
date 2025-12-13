@@ -3,16 +3,16 @@ import react from '@vitejs/plugin-react';
 
 // GitHub Pages 部署配置
 // 开发环境使用根路径，生产环境使用仓库名作为 base
-// 如果仓库名不是 'FactoryCalculator'，请设置环境变量 VITE_REPO_NAME
+// 如果设置了 VITE_REPO_NAME 环境变量，使用它作为 base 路径
+// 否则在生产构建时使用默认仓库名 'FactoryCalculator'
 const repositoryName = process.env.VITE_REPO_NAME || 'FactoryCalculator';
-// 如果有 VITE_REPO_NAME 环境变量，说明是生产构建，使用仓库名作为 base
-// 否则使用根路径（开发环境）
-const base = process.env.VITE_REPO_NAME ? `/${repositoryName}/` : '/';
+const isProduction = process.env.NODE_ENV === 'production';
+// 在生产构建时，如果设置了仓库名，使用子路径；否则使用根路径
+// 开发环境始终使用根路径
+const base = (isProduction && repositoryName) ? `/${repositoryName}/` : '/';
 
 // 输出配置信息（用于调试）
-if (process.env.VITE_REPO_NAME) {
-  console.log(`Building for GitHub Pages with base: ${base}`);
-}
+console.log(`Building with base: ${base} (NODE_ENV: ${process.env.NODE_ENV}, REPO: ${repositoryName})`);
 
 export default defineConfig({
   plugins: [react()],

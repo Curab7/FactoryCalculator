@@ -1,18 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
-    <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoFact - 工厂量化助手</title>
     <script>
       // GitHub Pages 404 重定向到 index.html（用于 SPA 路由支持）
-      const path = window.location.pathname;
-      const repoName = path.split('/')[1] || '';
-      const basePath = repoName ? `/${repoName}` : '';
-      window.location.replace(`${basePath}/index.html${window.location.search}${window.location.hash}`);
+      (function() {
+        const path = window.location.pathname;
+        const search = window.location.search;
+        const hash = window.location.hash;
+        
+        // 如果已经是 index.html，不需要重定向
+        if (path.endsWith('index.html')) {
+          return;
+        }
+        
+        // 提取基础路径（仓库名）
+        // 例如：/FactoryCalculator/some/path -> /FactoryCalculator
+        const segments = path.split('/').filter(Boolean);
+        let basePath = '';
+        
+        // 如果路径包含多个段，第一个段通常是仓库名
+        // 但需要排除常见的文件扩展名
+        if (segments.length > 0) {
+          const firstSegment = segments[0];
+          // 如果第一个段不包含点号（不是文件），可能是仓库名
+          if (!firstSegment.includes('.')) {
+            basePath = `/${firstSegment}`;
+          }
+        }
+        
+        // 构建重定向路径
+        const redirectPath = `${basePath}/index.html${search}${hash}`;
+        
+        // 执行重定向
+        window.location.replace(redirectPath);
+      })();
     </script>
   </head>
   <body>
-    <p>正在重定向...</p>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+      <p>正在重定向...</p>
+    </div>
   </body>
 </html>
 
