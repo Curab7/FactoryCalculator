@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:gh-pages": "set VITE_REPO_NAME=FactoryCalculator&& vite build",
     "preview": "vite preview"
   },
   "dependencies": {
