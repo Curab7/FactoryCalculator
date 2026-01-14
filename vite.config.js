@@ -29,9 +29,13 @@ export default defineConfig({
       output: {
         assetFileNames: 'assets/[name].[hash].[ext]',
         chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js'
+        entryFileNames: 'assets/[name].[hash].js',
+        // 确保 JS 文件被正确识别
+        manualChunks: undefined
       }
-    }
+    },
+    // 确保 JS 文件使用正确的 MIME 类型
+    assetsInlineLimit: 0
   }
 });
 
