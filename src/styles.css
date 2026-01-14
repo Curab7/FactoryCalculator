@@ -12,6 +12,11 @@ body {
   color: #0f172a;
 }
 
+.dark body {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
 .animate-spin-slow {
   animation: spin 2s linear infinite;
 }
@@ -41,5 +46,13 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: #475569 transparent;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
 }
 

@@ -41,31 +41,31 @@ export default function CalculatorView({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-5 items-end md:items-center justify-between">
+      <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row gap-5 items-end md:items-center justify-between">
         <div className="flex flex-wrap gap-5 items-end w-full md:w-auto">
           <div className="space-y-1 relative w-full md:w-64" ref={wrapperRef}>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">目标产物</label>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">目标产物</label>
             <div className="relative">
               <div
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white flex items-center justify-between cursor-pointer hover:border-blue-400 transition"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 flex items-center justify-between cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
-                <span className={targetItem ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                <span className={targetItem ? 'text-slate-800 dark:text-slate-200 font-medium' : 'text-slate-400 dark:text-slate-500'}>
                   {targetItem || '选择产物...'}
                 </span>
-                <ChevronDown size={16} className="text-slate-400" />
+                <ChevronDown size={16} className="text-slate-400 dark:text-slate-500" />
               </div>
 
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
-                  <div className="p-2 sticky top-0 bg-white border-b border-slate-100">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+                  <div className="p-2 sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                     <div className="relative">
-                      <Search size={14} className="absolute left-2 top-2.5 text-slate-400" />
+                      <Search size={14} className="absolute left-2 top-2.5 text-slate-400 dark:text-slate-500" />
                       <input
                         autoFocus
                         type="text"
                         placeholder="搜索..."
-                        className="w-full pl-8 pr-2 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded focus:outline-none focus:border-blue-500"
+                        className="w-full pl-8 pr-2 py-1.5 text-sm bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 text-slate-900 dark:text-slate-100"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
@@ -75,8 +75,8 @@ export default function CalculatorView({
                     filteredItems.map((item) => (
                       <div
                         key={item}
-                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 ${
-                          item === targetItem ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700'
+                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 ${
+                          item === targetItem ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium' : 'text-slate-700 dark:text-slate-300'
                         }`}
                         onClick={() => handleSelect(item)}
                       >
@@ -84,7 +84,7 @@ export default function CalculatorView({
                       </div>
                     ))
                   ) : (
-                    <div className="px-4 py-3 text-sm text-slate-400 text-center">无结果</div>
+                    <div className="px-4 py-3 text-sm text-slate-400 dark:text-slate-500 text-center">无结果</div>
                   )}
                 </div>
               )}
@@ -92,28 +92,28 @@ export default function CalculatorView({
           </div>
 
           <div className="space-y-1 w-full md:w-32">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">目标速率 (/min)</label>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">目标速率 (/min)</label>
             <input
               type="number"
               value={targetRate}
               onChange={(e) => setTargetRate(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 outline-none font-mono bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
             />
           </div>
         </div>
 
         <div className="text-right hidden md:block">
-          <div className="text-xs text-slate-400">数据状态</div>
-          <div className="text-sm font-medium text-green-600 flex items-center justify-end gap-1">
+          <div className="text-xs text-slate-400 dark:text-slate-500">数据状态</div>
+          <div className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center justify-end gap-1">
             <Save size={14} /> 已本地保存
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 overflow-x-auto min-h-[500px]">
-          <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-            <Settings className="w-5 h-5 mr-2 text-blue-600" />
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-x-auto min-h-[500px]">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-6 flex items-center">
+            <Settings className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
             生产流程树
           </h2>
           <div className="pb-12 min-w-max">
@@ -125,17 +125,17 @@ export default function CalculatorView({
                 isRoot
               />
             ) : (
-              <div className="text-slate-400 text-center py-20 flex flex-col items-center">
-                <CalculatorIcon size={48} className="mb-4 text-slate-200" />
+              <div className="text-slate-400 dark:text-slate-500 text-center py-20 flex flex-col items-center">
+                <CalculatorIcon size={48} className="mb-4 text-slate-200 dark:text-slate-700" />
                 请在上方的下拉框中选择一个目标产物
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit sticky top-24">
-          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-            <Database className="w-5 h-5 mr-2 text-green-600" />
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 h-fit sticky top-24">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center">
+            <Database className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
             物料平衡表
           </h2>
 
@@ -145,12 +145,14 @@ export default function CalculatorView({
                 <div
                   key={item}
                   className={`flex justify-between items-center p-3 rounded-lg border ${
-                    rate >= 0 ? 'bg-green-50/50 border-green-100' : 'bg-amber-50/50 border-amber-100'
+                    rate >= 0 
+                      ? 'bg-green-50/50 dark:bg-green-900/20 border-green-100 dark:border-green-800' 
+                      : 'bg-amber-50/50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800'
                   }`}
                 >
-                  <span className="font-medium text-slate-700 text-sm">{item}</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300 text-sm">{item}</span>
                   <span
-                    className={`font-mono font-bold text-sm ${rate >= 0 ? 'text-green-600' : 'text-amber-600'}`}
+                    className={`font-mono font-bold text-sm ${rate >= 0 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}
                   >
                     {rate > 0 ? '+' : ''}
                     {parseFloat(rate.toFixed(2))}/m
@@ -158,13 +160,13 @@ export default function CalculatorView({
                 </div>
               ))
             ) : (
-              <div className="text-center text-slate-400 py-10 text-sm">暂无数据</div>
+              <div className="text-center text-slate-400 dark:text-slate-500 py-10 text-sm">暂无数据</div>
             )}
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">提示</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
+          <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">提示</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               如果在树状图中看到下拉箭头，说明该物品有多个可用配方，您可以点击切换。
             </p>
           </div>

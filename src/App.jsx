@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Calculator, Database, Github } from 'lucide-react';
+import { Calculator, Database, Github, Moon, Sun } from 'lucide-react';
 import CalculatorView from './components/CalculatorView';
 import DatabaseView from './components/DatabaseView';
 import TabButton from './components/TabButton';
 import { DEFAULT_GROUP_NAME, INITIAL_RECIPES } from './data/recipes';
 
 const STORAGE_KEY = 'factory_calc_data';
+const THEME_STORAGE_KEY = 'factory_calc_theme';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('calculator');
@@ -16,6 +17,10 @@ export default function App() {
   const [targetItem, setTargetItem] = useState('电路板');
   const [targetRate, setTargetRate] = useState(60);
   const [preferredRecipes, setPreferredRecipes] = useState({});
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    return saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
 
   const recipes = useMemo(() => recipeGroups[currentGroupName] || [], [recipeGroups, currentGroupName]);
 
@@ -34,6 +39,20 @@ export default function App() {
       console.error('Failed to load saved data', e);
     }
   }, []);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem(THEME_STORAGE_KEY, 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => !prev);
+  };
 
   useEffect(() => {
     const dataToSave = {
@@ -146,20 +165,20 @@ export default function App() {
   }, [productionTree]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <header className="bg-slate-800 text-white shadow-lg sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors">
+      <header className="bg-slate-800 dark:bg-slate-950 text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="bg-blue-600 p-1.5 rounded-lg">
+            <div className="bg-blue-600 dark:bg-blue-500 p-1.5 rounded-lg">
               <span className="w-5 h-5 animate-spin-slow block border-2 border-white/60 border-t-white rounded-full"></span>
             </div>
             <div>
               <h1 className="text-lg font-bold leading-none">AutoFact</h1>
-              <span className="text-xs text-slate-400">工厂量化助手</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">工厂量化助手</span>
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <nav className="flex space-x-1 bg-slate-900/50 p-1 rounded-lg">
+            <nav className="flex space-x-1 bg-slate-900/50 dark:bg-slate-800/50 p-1 rounded-lg">
               <TabButton
                 active={activeTab === 'calculator'}
                 onClick={() => setActiveTab('calculator')}
@@ -173,6 +192,13 @@ export default function App() {
                 label="配方管理"
               />
             </nav>
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              title={isDarkMode ? '切换到浅色模式' : '切换到夜间模式'}
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             <a
               href="https://github.com/Curab7/FactoryCalculator"
               target="_blank"
@@ -211,19 +237,19 @@ export default function App() {
         )}
       </main>
 
-      <footer className="bg-slate-100 border-t border-slate-200 py-4 mt-auto">
+      <footer className="bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-4 mt-auto">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             <a
               href="https://github.com/Curab7/FactoryCalculator"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-700 hover:underline"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline"
             >
               GitHub 仓库
             </a>
             {' · '}
-            <span className="text-slate-500">纯AI制作</span>
+            <span className="text-slate-500 dark:text-slate-500">纯AI制作</span>
           </p>
         </div>
       </footer>
