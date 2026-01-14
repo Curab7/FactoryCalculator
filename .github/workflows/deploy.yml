@@ -36,8 +36,19 @@ jobs:
           NODE_ENV: production
           VITE_REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          export VITE_REPO_NAME=${{ github.event.repository.name }}
+          echo "Building with VITE_REPO_NAME=$VITE_REPO_NAME"
           npm run build
+          echo "Build completed. Verifying dist/index.html..."
+          if grep -q "cdn.tailwindcss.com" dist/index.html; then
+            echo "ERROR: Tailwind CDN found in dist/index.html!"
+            exit 1
+          fi
+          if grep -q "/src/main.jsx" dist/index.html; then
+            echo "ERROR: /src/main.jsx found in dist/index.html!"
+            exit 1
+          fi
+          echo "✓ Build verification passed"
+          cat dist/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
