@@ -35,7 +35,9 @@ jobs:
         env:
           NODE_ENV: production
           VITE_REPO_NAME: ${{ github.event.repository.name }}
-        run: npm run build
+        run: |
+          export VITE_REPO_NAME=${{ github.event.repository.name }}
+          npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
