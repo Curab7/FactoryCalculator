@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   AlertTriangle,
   ArrowRight,
@@ -13,6 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { generateId } from '../utils/id';
+import AutocompleteInput from './AutocompleteInput';
 
 export default function DatabaseView({
   recipes,
@@ -66,6 +67,16 @@ export default function DatabaseView({
       r.machine.toLowerCase().includes(term)
     );
   });
+
+  // 获取所有已存在的物品名称
+  const allItems = useMemo(() => {
+    const items = new Set();
+    recipes.forEach((r) => {
+      r.inputs.forEach((i) => items.add(i.item));
+      r.outputs.forEach((o) => items.add(o.item));
+    });
+    return Array.from(items).sort();
+  }, [recipes]);
 
   const handleCreateGroup = () => {
     if (!newGroupInput.trim()) return;
@@ -331,11 +342,12 @@ export default function DatabaseView({
               </div>
               {newRecipe.inputs.map((input, idx) => (
                 <div key={idx} className="flex gap-2 mb-2">
-                  <input
+                  <AutocompleteInput
+                    value={input.item}
+                    onChange={(value) => updateInput(idx, 'item', value)}
+                    suggestions={allItems}
                     placeholder="名称"
                     className="flex-1 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded focus:border-blue-500 dark:focus:border-blue-400 outline-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    value={input.item}
-                    onChange={(e) => updateInput(idx, 'item', e.target.value)}
                   />
                   <input
                     type="number"
@@ -369,11 +381,12 @@ export default function DatabaseView({
               </div>
               {newRecipe.outputs.map((output, idx) => (
                 <div key={idx} className="flex gap-2 mb-2">
-                  <input
+                  <AutocompleteInput
+                    value={output.item}
+                    onChange={(value) => updateOutput(idx, 'item', value)}
+                    suggestions={allItems}
                     placeholder="名称"
                     className="flex-1 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded focus:border-blue-500 dark:focus:border-blue-400 outline-none bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                    value={output.item}
-                    onChange={(e) => updateOutput(idx, 'item', e.target.value)}
                   />
                   <input
                     type="number"
