@@ -1,14 +1,19 @@
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import React from 'react';
 
 export default function TreeNode({
   node,
   preferredRecipes,
   setPreferredRecipes,
+  isNodeExpanded,
+  toggleNodeExpanded,
+  nodePath,
   isRoot = false
 }) {
   const isRaw = node.type === 'raw';
   const hasAlternatives = node.availableRecipes && node.availableRecipes.length > 1;
+  const hasChildren = !isRaw && node.children && node.children.length > 0;
+  const isExpanded = isNodeExpanded(nodePath);
 
   const handleRecipeSwitch = (recipeId) => {
     setPreferredRecipes((prev) => ({
@@ -17,11 +22,20 @@ export default function TreeNode({
     }));
   };
 
+  const toggleExpand = (e) => {
+    e.stopPropagation();
+    if (hasChildren) {
+      toggleNodeExpanded(nodePath);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center relative">
       <div
+        onClick={toggleExpand}
         className={`
         relative z-10 flex flex-col items-center p-3 rounded-xl border transition-all min-w-[160px]
+        ${hasChildren ? 'cursor-pointer hover:ring-2 hover:ring-blue-200 dark:hover:ring-blue-800' : ''}
         ${isRoot ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-400 dark:border-blue-500 shadow-md ring-2 ring-blue-100 dark:ring-blue-900/50' : 'bg-white dark:bg-slate-800'}
         ${isRaw ? 'border-slate-300 dark:border-slate-600 border-dashed bg-slate-50 dark:bg-slate-800/50' : 'border-slate-200 dark:border-slate-700 shadow-sm'}
       `}
@@ -83,11 +97,22 @@ export default function TreeNode({
             RAW
           </div>
         )}
+
+        {/* 展开/折叠指示器 */}
+        {hasChildren && (
+          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full p-0.5 shadow-sm">
+            {isExpanded ? (
+              <ChevronDown size={12} className="text-slate-500 dark:text-slate-400" />
+            ) : (
+              <ChevronRight size={12} className="text-slate-500 dark:text-slate-400" />
+            )}
+          </div>
+        )}
       </div>
 
-      {!isRaw && node.children && node.children.length > 0 && (
+      {hasChildren && isExpanded && (
         <>
-          <div className="w-px h-6 bg-slate-300 dark:bg-slate-600"></div>
+          <div className="w-px h-6 bg-slate-300 dark:bg-slate-600 mt-1"></div>
           <div className="flex items-start justify-center gap-4 relative">
             {node.children.map((child, index) => (
               <div key={`${child.item}-${index}`} className="flex flex-col items-center pt-4 relative">
@@ -109,11 +134,21 @@ export default function TreeNode({
                   node={child}
                   preferredRecipes={preferredRecipes}
                   setPreferredRecipes={setPreferredRecipes}
+                  isNodeExpanded={isNodeExpanded}
+                  toggleNodeExpanded={toggleNodeExpanded}
+                  nodePath={`${nodePath}/${child.item}-${index}`}
                 />
               </div>
             ))}
           </div>
         </>
+      )}
+      
+      {/* 折叠时显示子节点数量提示 */}
+      {hasChildren && !isExpanded && (
+        <div className="mt-2 text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+          {node.children.length} 个子节点已折叠
+        </div>
       )}
     </div>
   );

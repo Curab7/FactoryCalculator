@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Calculator as CalculatorIcon, ChevronDown, Database, Save, Search, Settings } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Calculator as CalculatorIcon, ChevronDown, ChevronsDownUp, ChevronsUpDown, Database, Maximize2, Minus, Plus, Save, Search, Settings } from 'lucide-react';
 import TreeNode from './TreeNode';
 
 export default function CalculatorView({
@@ -16,6 +16,21 @@ export default function CalculatorView({
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const wrapperRef = useRef(null);
+
+  // 缩放与拖动状态
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const treeContainerRef = useRef(null);
+  const treeContentRef = useRef(null);
+
+  // 节点展开/折叠状态（key 为节点路径，value 为是否展开）
+  const [expandedNodes, setExpandedNodes] = useState({});
+
+  const MIN_SCALE = 0.25;
+  const MAX_SCALE = 2;
+  const SCALE_STEP = 0.1;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -38,6 +53,122 @@ export default function CalculatorView({
     setSearchTerm('');
     setIsDropdownOpen(false);
   };
+
+  // 缩放处理函数
+  const handleZoom = useCallback((delta, centerX, centerY) => {
+    setScale((prevScale) => {
+      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prevScale + delta));
+      
+      // 如果提供了中心点，则围绕该点缩放
+      if (centerX !== undefined && centerY !== undefined && treeContainerRef.current) {
+        const rect = treeContainerRef.current.getBoundingClientRect();
+        const x = centerX - rect.left;
+        const y = centerY - rect.top;
+        
+        const scaleRatio = newScale / prevScale;
+        setPosition((prev) => ({
+          x: x - (x - prev.x) * scaleRatio,
+          y: y - (y - prev.y) * scaleRatio
+        }));
+      }
+      
+      return newScale;
+    });
+  }, []);
+
+  const zoomIn = useCallback(() => handleZoom(SCALE_STEP), [handleZoom]);
+  const zoomOut = useCallback(() => handleZoom(-SCALE_STEP), [handleZoom]);
+  const resetView = useCallback(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  // 鼠标滚轮缩放（无需按 Ctrl）
+  const handleWheel = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const delta = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP;
+    handleZoom(delta, e.clientX, e.clientY);
+  }, [handleZoom]);
+
+  // 使用 passive: false 的事件监听器来确保可以阻止默认滚动行为
+  useEffect(() => {
+    const container = treeContainerRef.current;
+    if (!container) return;
+
+    const wheelHandler = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const delta = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP;
+      handleZoom(delta, e.clientX, e.clientY);
+    };
+
+    container.addEventListener('wheel', wheelHandler, { passive: false });
+    return () => container.removeEventListener('wheel', wheelHandler);
+  }, [handleZoom]);
+
+  // 切换节点展开/折叠状态
+  const toggleNodeExpanded = useCallback((nodePath) => {
+    setExpandedNodes((prev) => ({
+      ...prev,
+      [nodePath]: prev[nodePath] === undefined ? false : !prev[nodePath]
+    }));
+  }, []);
+
+  // 判断节点是否展开（默认展开）
+  const isNodeExpanded = useCallback((nodePath) => {
+    return expandedNodes[nodePath] !== false;
+  }, [expandedNodes]);
+
+  // 全部展开
+  const expandAll = useCallback(() => {
+    setExpandedNodes({});
+  }, []);
+
+  // 拖动开始
+  const handleMouseDown = useCallback((e) => {
+    // 排除点击到控件元素的情况
+    if (e.target.closest('select, button, input')) return;
+    
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  }, [position]);
+
+  // 拖动中
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging) return;
+    
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  }, [isDragging, dragStart]);
+
+  // 拖动结束
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // 添加全局鼠标事件监听（用于处理拖动到容器外的情况）
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // 目标产物变化时重置视图和展开状态
+  useEffect(() => {
+    resetView();
+    setExpandedNodes({});
+  }, [targetItem, resetView]);
 
   return (
     <div className="space-y-6">
@@ -111,23 +242,101 @@ export default function CalculatorView({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-x-auto min-h-[500px]">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-6 flex items-center">
-            <Settings className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
-            生产流程树
-          </h2>
-          <div className="pb-12 min-w-max">
-            {treeData ? (
-              <TreeNode
-                node={treeData}
-                preferredRecipes={preferredRecipes}
-                setPreferredRecipes={setPreferredRecipes}
-                isRoot
-              />
-            ) : (
-              <div className="text-slate-400 dark:text-slate-500 text-center py-20 flex flex-col items-center">
-                <CalculatorIcon size={48} className="mb-4 text-slate-200 dark:text-slate-700" />
-                请在上方的下拉框中选择一个目标产物
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 min-h-[500px] flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center">
+              <Settings className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+              生产流程树
+            </h2>
+            
+            {/* 缩放控件 */}
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+              <button
+                onClick={zoomOut}
+                disabled={scale <= MIN_SCALE}
+                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                title="缩小"
+              >
+                <Minus size={16} className="text-slate-600 dark:text-slate-300" />
+              </button>
+              <span className="text-xs font-mono text-slate-600 dark:text-slate-300 w-12 text-center select-none">
+                {Math.round(scale * 100)}%
+              </span>
+              <button
+                onClick={zoomIn}
+                disabled={scale >= MAX_SCALE}
+                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                title="放大"
+              >
+                <Plus size={16} className="text-slate-600 dark:text-slate-300" />
+              </button>
+              <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-1"></div>
+              <button
+                onClick={resetView}
+                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                title="重置视图"
+              >
+                <Maximize2 size={16} className="text-slate-600 dark:text-slate-300" />
+              </button>
+              <div className="w-px h-5 bg-slate-300 dark:bg-slate-500 mx-1"></div>
+              <button
+                onClick={expandAll}
+                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                title="全部展开"
+              >
+                <ChevronsUpDown size={16} className="text-slate-600 dark:text-slate-300" />
+              </button>
+            </div>
+          </div>
+
+          {/* 可缩放拖动的树容器 */}
+          <div
+            ref={treeContainerRef}
+            className="flex-1 overflow-hidden relative rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50"
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            onMouseDown={handleMouseDown}
+          >
+            {/* 网格背景 */}
+            <div 
+              className="absolute inset-0 opacity-30 dark:opacity-20 pointer-events-none"
+              style={{
+                backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)',
+                backgroundSize: `${20 * scale}px ${20 * scale}px`,
+                backgroundPosition: `${position.x % (20 * scale)}px ${position.y % (20 * scale)}px`
+              }}
+            />
+            
+            <div
+              ref={treeContentRef}
+              className="p-8 min-w-max"
+              style={{
+                transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                transformOrigin: '0 0',
+                transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+              }}
+            >
+              {treeData ? (
+                <TreeNode
+                  node={treeData}
+                  preferredRecipes={preferredRecipes}
+                  setPreferredRecipes={setPreferredRecipes}
+                  isNodeExpanded={isNodeExpanded}
+                  toggleNodeExpanded={toggleNodeExpanded}
+                  nodePath="root"
+                  isRoot
+                />
+              ) : (
+                <div className="text-slate-400 dark:text-slate-500 text-center py-20 flex flex-col items-center">
+                  <CalculatorIcon size={48} className="mb-4 text-slate-200 dark:text-slate-700" />
+                  请在上方的下拉框中选择一个目标产物
+                </div>
+              )}
+            </div>
+
+            {/* 操作提示 */}
+            {treeData && (
+              <div className="absolute bottom-2 left-2 text-[10px] text-slate-400 dark:text-slate-500 bg-white/80 dark:bg-slate-800/80 px-2 py-1 rounded backdrop-blur-sm">
+                拖动平移 · 滚轮缩放 · 点击节点折叠/展开
               </div>
             )}
           </div>
